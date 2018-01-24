@@ -5,6 +5,7 @@
 #include "TString.h"
 #include "TRandom.h"
 #include "TH1F.h"
+#include "TMath.h"
 
 #include "TFile.h"
 #include "TTree.h"
@@ -16,7 +17,7 @@
 #include "TLatex.h"
 #include "TString.h"
 #include "TStyle.h"
-#include "/afs/cern.ch/user/d/dgulhan/workDir/private/thesisPlots/dijetpPb/utilities.h"
+#include "../paperPlot/utilities.h"
 #include "TPaletteAxis.h"
 
 void plotSystematics(){
@@ -169,8 +170,11 @@ void plotSystematics(){
    float yjesup = histRatDataMCUp[ipt]->GetBinContent(ibin+1);
    float yjesdown = histRatDataMCDown[ipt]->GetBinContent(ibin+1);
    histTotal[ipt]->SetBinContent(ibin+1, sqrt(pow(yptres-1,2.)+pow(yetares-1,2.)+pow(yptoff-1,2.)+pow(yfake-1,2))+1);
-   histTotalPositive[ipt]->SetBinContent(ibin+1, sqrt(pow(TMath::Max(yptres-1,0.),2.)+pow(TMath::Max(yetares-1,0.),2.)+pow(TMath::Max(yptoff-1,0.),2.)+pow(TMath::Max(yfake-1,0.),2)+pow(TMath::Max(yjesup-1,0.),2)+pow(TMath::Max(yjesdown-1,0.),2))+1);
-   histTotalNegative[ipt]->SetBinContent(ibin+1, -sqrt(pow(TMath::Min(yptres-1,0.),2.)+pow(TMath::Min(yetares-1,0.),2.)+pow(TMath::Min(yptoff-1,0.),2.)+pow(TMath::Min(yfake-1,0.),2)+pow(TMath::Min(yjesup-1,0.),2)+pow(TMath::Min(yjesdown-1,0.),2))+1);
+   histTotalPositive[ipt]->SetBinContent(ibin+1,
+   sqrt(pow(TMath::Max(yptres-1,(float)0.),2.)+pow(TMath::Max(yetares-1,(float)0.),2.)+pow(TMath::Max(yptoff-1,(float)0.),2.)+pow(TMath::Max(yfake-1,(float)0.),2)+pow(TMath::Max(yjesup-1,(float)0.),2)+pow(TMath::Max(yjesdown-1,(float)0.),2))+1);
+   histTotalNegative[ipt]->SetBinContent(ibin+1,
+   -sqrt(pow(TMath::Min(yptres-1,(float)0.),2.)+pow(TMath::Min(yetares-1,(float)0.),2.)+pow(TMath::Min(yptoff-1,(float)0.),2.)+pow(TMath::Min(yfake-1,(float)0.),2)+pow(TMath::Min(yjesup-1,(float)
+   0.),2)+pow(TMath::Min(yjesdown-1,(float)0.),2))+1);
   }
     }
 
