@@ -9,7 +9,7 @@
 
 static const int totalbins = 18;
 
-void display(TMatrixT<float> mat, int nbins) {
+void display(TMatrixT<double> mat, int nbins) {
    for (int j=0; j<nbins; ++j) {
       for (int k=0; k<nbins; ++k)
          printf(" %9.2e", mat[j][k]);
@@ -27,14 +27,14 @@ int chisq(const char* data, const char* datahist,
    TH1D* hpdf = (TH1D*)fpdf->Get(pdfhist);
 
    int offset = totalbins - nbins;
-   float* dataval = new float[nbins];
-   float* pdfval = new float[nbins];
+   double* dataval = new double[nbins];
+   double* pdfval = new double[nbins];
    for (int i=0; i<nbins; ++i) {
       dataval[i] = hdata->GetBinContent(1+offset+i);
       pdfval[i] = hpdf->GetBinContent(1+offset+i);
    }
 
-   TMatrixT<float> covmat(nbins, nbins);
+   TMatrixT<double> covmat(nbins, nbins);
    covmat.Zero();
    for (int j=0; j<nbins; ++j) {
       std::string line;
@@ -46,16 +46,21 @@ int chisq(const char* data, const char* datahist,
    // display(covmat, nbins);
    // printf("............................................................\n");
 
-   TMatrixT<float> invcovmat = covmat.Invert();
+   double det;
+   TMatrixT<double> invcovmat = covmat.Invert(&det);
+   printf("determinant: %f\n", det);
    // display(invcovmat, nbins);
    // printf("............................................................\n");
 
-   float chisqval = 0;
+   double chisqval = 0;
    for (int j=0; j<nbins; ++j)
       for (int k=0; k<nbins; ++k)
          chisqval += (dataval[j] - pdfval[j]) * invcovmat[j][k] * (dataval[k] - pdfval[k]);
 
-   float prob = TMath::Prob(chisqval, nbins);
+   // scale back
+   chisqval *= 4000;
+
+   double prob = TMath::Prob(chisqval, nbins);
 
    printf("chisq: %f, prob: %f\n", chisqval, prob);
    printf("............................................................\n");
