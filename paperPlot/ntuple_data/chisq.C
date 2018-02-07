@@ -57,6 +57,8 @@ int chisq(const char* data, const char* datahist,
       for (int k=0; k<nbins; ++k)
          chisqval += (dataval[j] - pdfval[j]) * invcovmat[j][k] * (dataval[k] - pdfval[k]);
 
+   // scale back
+   chisqval *= 4000;
 
    double prob = TMath::Prob(chisqval, nbins);
 

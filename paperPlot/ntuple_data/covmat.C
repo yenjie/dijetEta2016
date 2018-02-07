@@ -49,6 +49,9 @@ void covmat(const char* input, TMatrixT<double>& mat, int nbins) {
    }
 
    mat *= (1. / nentries);
+
+   // scale by arbitrary amount or determinant will be too small
+   mat *= 4000;
 }
 
 int main(int argc, char* argv[]) {
