@@ -23,6 +23,8 @@ int samplestat(const char* input, const char* output) {
       TFile* foutput = new TFile(Form("%s_%i.root", output, p), "recreate");
       TTree* tout = new TTree("t", "samplestat");
 
+      TH1D* hcentre = (TH1D*)finput->Get(Form("hist_eta_rat_%i", p))->Clone("hcentre");
+
       int nBins = nbins;
       int iter = 0;
       float eta[100];
@@ -58,6 +60,7 @@ int samplestat(const char* input, const char* output) {
       }
 
       tout->Write("", TObject::kOverwrite);
+      hcentre->Write("", TObject::kOverwrite);
       foutput->Close();
    }
 

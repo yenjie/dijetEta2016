@@ -1,6 +1,7 @@
 #include "TFile.h"
 #include "TTree.h"
 #include "TMatrixT.h"
+#include "TH1.h"
 
 static const int totalbins = 18;
 
@@ -40,6 +41,18 @@ void covmat(const char* input, TMatrixT<double>& mat, int nbins) {
    for (int j=offset; j<totalbins; ++j)
       mean[j] /= nentries;
 
+   if (strstr(input, "data")) {
+      TH1D* hcentre = (TH1D*)finput->Get("hcentre");
+      for (int j=offset; j<totalbins; ++j)
+         mean[j] = hcentre->GetBinContent(1+offset+j);
+   }
+
+   if (strstr(input, "output")) {
+      t->GetEntry(0);
+      for (int j=offset; j<totalbins; ++j)
+         mean[j] = val[j];
+   }
+
    for (int i=0; i<nentries; ++i) {
       t->GetEntry(i);
 
@@ -51,7 +64,7 @@ void covmat(const char* input, TMatrixT<double>& mat, int nbins) {
    mat *= (1. / nentries);
 
    // scale by arbitrary amount or determinant will be too small
-   mat *= 4000;
+   mat *= 2000;
 }
 
 int main(int argc, char* argv[]) {
