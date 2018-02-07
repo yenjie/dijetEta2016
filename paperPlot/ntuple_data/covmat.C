@@ -4,15 +4,15 @@
 
 static const int totalbins = 18;
 
-void display(TMatrixT<float> mat, int nbins) {
+void display(TMatrixT<double> mat, int nbins) {
    for (int j=0; j<nbins; ++j) {
       for (int k=0; k<nbins; ++k)
-         printf(" %9.2e", mat[j][k]);
+         printf(" %f", mat[j][k]);
       printf("\n");
    }
 }
 
-void covmat(const char* input, TMatrixT<float>& mat, int nbins) {
+void covmat(const char* input, TMatrixT<double>& mat, int nbins) {
    TFile* finput = new TFile(input, "read");
    TTree* t = (TTree*)finput->Get("t");
 
@@ -28,7 +28,7 @@ void covmat(const char* input, TMatrixT<float>& mat, int nbins) {
 
    int offset = totalbins - nbins;
 
-   float mean[totalbins] = {0};
+   double mean[totalbins] = {0};
    int nentries = t->GetEntries();
    for (int i=0; i<nentries; ++i) {
       t->GetEntry(i);
@@ -55,10 +55,10 @@ int main(int argc, char* argv[]) {
    if (argc > 2) {
       int nbins = atoi(argv[1]);
 
-      TMatrixT<float> sum(nbins, nbins);
+      TMatrixT<double> sum(nbins, nbins);
       sum.Zero();
       for (int f=2; f<argc; ++f) {
-         TMatrixT<float> mat(nbins, nbins);
+         TMatrixT<double> mat(nbins, nbins);
          mat.Zero();
          covmat(argv[f], mat, nbins);
 
