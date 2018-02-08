@@ -3,8 +3,6 @@
 #include "TMatrixT.h"
 #include "TH1.h"
 
-static const int totalbins = 18;
-
 void display(TMatrixT<double> mat, int nbins) {
    for (int j=0; j<nbins; ++j) {
       for (int k=0; k<nbins; ++k)
@@ -13,7 +11,7 @@ void display(TMatrixT<double> mat, int nbins) {
    }
 }
 
-void covmat(const char* input, TMatrixT<double>& mat, int nbins) {
+void covmat(const char* input, TMatrixT<double>& mat, int startb, int endb) {
    TFile* finput = new TFile(input, "read");
    TTree* t = (TTree*)finput->Get("t");
 
@@ -27,30 +25,31 @@ void covmat(const char* input, TMatrixT<double>& mat, int nbins) {
    t->SetBranchAddress("eta", eta);
    t->SetBranchAddress("i", &iter);
 
-   int offset = totalbins - nbins;
+   int nbins = endb - startb + 1;
+   int offset = startb - 1;
 
-   double mean[totalbins] = {0};
+   double* mean = new double[nbins];
    int nentries = t->GetEntries();
    for (int i=0; i<nentries; ++i) {
       t->GetEntry(i);
 
-      for (int j=offset; j<totalbins; ++j)
-         mean[j] += val[j];
+      for (int j=0; j<nbins; ++j)
+         mean[j] += val[j+offset];
    }
 
-   for (int j=offset; j<totalbins; ++j)
+   for (int j=0; j<nbins; ++j)
       mean[j] /= nentries;
 
    if (strstr(input, "data")) {
       TH1D* hcentre = (TH1D*)finput->Get("hcentre");
-      for (int j=offset; j<totalbins; ++j)
-         mean[j] = hcentre->GetBinContent(1+offset+j);
+      for (int j=0; j<nbins; ++j)
+         mean[j] = hcentre->GetBinContent(startb+j);
    }
 
    if (strstr(input, "output")) {
       t->GetEntry(0);
-      for (int j=offset; j<totalbins; ++j)
-         mean[j] = val[j];
+      for (int j=0; j<nbins; ++j)
+         mean[j] = val[j+offset];
    }
 
    for (int i=0; i<nentries; ++i) {
@@ -58,7 +57,7 @@ void covmat(const char* input, TMatrixT<double>& mat, int nbins) {
 
       for (int j=0; j<nbins; ++j)
          for (int k=0; k<nbins; ++k)
-            mat[j][k] += (val[j+offset] - mean[j+offset]) * (val[k+offset] - mean[k+offset]);
+            mat[j][k] += (val[j+offset] - mean[j]) * (val[k+offset] - mean[k]);
    }
 
    mat *= (1. / nentries);
@@ -68,15 +67,18 @@ void covmat(const char* input, TMatrixT<double>& mat, int nbins) {
 }
 
 int main(int argc, char* argv[]) {
-   if (argc > 2) {
-      int nbins = atoi(argv[1]);
+   if (argc > 3) {
+      int startb = atoi(argv[1]);
+      int endb = atoi(argv[2]);
+
+      int nbins = endb - startb + 1;
 
       TMatrixT<double> sum(nbins, nbins);
       sum.Zero();
-      for (int f=2; f<argc; ++f) {
+      for (int f=3; f<argc; ++f) {
          TMatrixT<double> mat(nbins, nbins);
          mat.Zero();
-         covmat(argv[f], mat, nbins);
+         covmat(argv[f], mat, startb, endb);
 
          sum += mat;
       }

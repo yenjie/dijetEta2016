@@ -7,8 +7,6 @@
 #include <iostream>
 #include <sstream>
 
-static const int totalbins = 18;
-
 void display(TMatrixT<double> mat, int nbins) {
    for (int j=0; j<nbins; ++j) {
       for (int k=0; k<nbins; ++k)
@@ -19,19 +17,19 @@ void display(TMatrixT<double> mat, int nbins) {
 
 int chisq(const char* data, const char* datahist,
           const char* pdf, const char* pdfhist,
-          int nbins) {
+          int startb, int endb) {
    TFile* fdata = new TFile(data, "read");
    TH1D* hdata = (TH1D*)fdata->Get(datahist);
 
    TFile* fpdf = new TFile(pdf, "read");
    TH1D* hpdf = (TH1D*)fpdf->Get(pdfhist);
 
-   int offset = totalbins - nbins;
+   int nbins = endb - startb + 1;
    double* dataval = new double[nbins];
    double* pdfval = new double[nbins];
    for (int i=0; i<nbins; ++i) {
-      dataval[i] = hdata->GetBinContent(1+offset+i);
-      pdfval[i] = hpdf->GetBinContent(1+offset+i);
+      dataval[i] = hdata->GetBinContent(startb+i);
+      pdfval[i] = hpdf->GetBinContent(startb+i);
    }
 
    TMatrixT<double> covmat(nbins, nbins);
@@ -69,8 +67,8 @@ int chisq(const char* data, const char* datahist,
 }
 
 int main(int argc, char* argv[]) {
-   if (argc == 6)
-      return chisq(argv[1], argv[2], argv[3], argv[4], atoi(argv[5]));
+   if (argc == 7)
+      return chisq(argv[1], argv[2], argv[3], argv[4], atoi(argv[5]), atoi(argv[6]));
    else
       return 1;
 }
