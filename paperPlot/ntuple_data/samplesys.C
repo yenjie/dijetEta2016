@@ -24,6 +24,13 @@ int samplesys(const char* input, const char* output) {
       TFile* foutput = new TFile(Form("%s_%i.root", output, p), "recreate");
       TTree* tout = new TTree("t", "samplesys");
 
+      TH1D* hcentre = (TH1D*)hpp[p]->Clone("hcentre");
+      for (int b=1; b<=nbins; ++b) {
+         double x, y;
+         gratio[p]->GetPoint(b-1, x, y);
+         hcentre->SetBinContent(b, y);
+      }
+
       int nBins = nbins;
       int iter = 0;
       float eta[100];
@@ -69,6 +76,7 @@ int samplesys(const char* input, const char* output) {
       }
 
       tout->Write("", TObject::kOverwrite);
+      hcentre->Write("", TObject::kOverwrite);
       foutput->Close();
    }
 
